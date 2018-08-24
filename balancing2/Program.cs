@@ -219,45 +219,35 @@ namespace balancing
 
             Solution.SolveMatrix();
 
-            //Multiply:
-            //for (int h = 0; h < Solution.ColumCount; h++)
-            //{
-            //    if (Math.Round(Solution.Answer[h], 0) != Solution.Answer[h])
-            //    {
-
-            //        if (Solution.Answer[h] % 10 == 6 || Solution.Answer[h] % 10 == 7)
-            //        {
-            //            multiply(Solution.Answer, 3);
-            //            goto Multiply;
-            //        }
-            //        //else
-            //        //{
-            //        //    multiply(Solution.Answer, 2);
-            //        //    goto Multiply;
-            //        //}
-            //    }
-            //}
+            Multiply:
+            for (int h = 0; h < Solution.ColumCount; h++)
+            {
+                
+                if (Solution.Answer[h] <1 )
+                {
+                    if (Solution.Answer[h] % 10 == 6 || Solution.Answer[h] % 10 == 7)
+                    {
+                        multiply(Solution.Answer, 3);
+                        goto Multiply;
+                    }
+                    else
+                    {
+                        multiply(Solution.Answer, 2);
+                        goto Multiply;
+                    }
+                }
+            }
 
             int loop = 0;
             for (int b = 0; b < Solution.ColumCount; b++)
             {
                 Console.Write(Solution.Answer[b]);
-                //if (Math.Round(Solution.Answer[b]) != Solution.Answer[b])
-                //{
-                //    string khan = Solution.Answer[b].ToString();
-                //    khan = khan.Replace(".", "");
-                //    Solution.Answer[b] = Double.Parse(khan);
-                //}
-                //Console.Write("\t{0}", Solution.Answer[b]);
 
                 for (; loop < eq.Length; loop++)
                 {
                     if (eq[loop] == equal || eq[loop] == plus)
                     {
-
-                        Console.Write(" ");
-                        Console.Write(eq[loop]);
-                        Console.Write(" ");
+                        Console.Write(" {0} ", eq[loop]);
                         loop++;
                         break;
                     }
@@ -385,126 +375,186 @@ namespace balancing
                 mas[u] *= number;
 
         }
-    }
 
-}
-class GausMethod
-{
-    public int RowCount;
-    public int ColumCount;
-    public double[][] Matrix { get; set; }
-    public double[] RightPart { get; set; }
-    public double[] Answer { get; set; }
-
-    public GausMethod(int Row, int Colum)
-    {
-        RightPart = new double[Row];
-        Answer = new double[Row];
-        Matrix = new double[Row][];
-        for (int i = 0; i < Row; i++)
-            Matrix[i] = new double[Colum];
-        RowCount = Row;
-        ColumCount = Colum;
-
-        //обнулим массив
-        for (int i = 0; i < Row; i++)
+        public static bool Solve(float[,] M)
         {
-            Answer[i] = 0;
-            RightPart[i] = 0;
-            for (int j = 0; j < Colum; j++)
-                Matrix[i][j] = 0;
-        }
-    }
+            // input checks
+            int rowCount = M.GetUpperBound(0) + 1;
+            if (M == null || M.Length != rowCount * (rowCount + 1))
+                throw new ArgumentException("The algorithm must be provided with a (n x n+1) matrix.");
+            if (rowCount < 1)
+                throw new ArgumentException("The matrix must at least have one row.");
 
-    private void SortRows(int SortIndex)
-    {
-
-        double MaxElement = Matrix[SortIndex][SortIndex];
-        int MaxElementIndex = SortIndex;
-        for (int i = SortIndex + 1; i < RowCount; i++)
-        {
-            if (Matrix[i][SortIndex] > MaxElement)
-            {
-                MaxElement = Matrix[i][SortIndex];
-                MaxElementIndex = i;
-            }
-        }
-
-        //теперь найден максимальный элемент ставим его на верхнее место
-        if (MaxElementIndex > SortIndex)//если это не первый элемент
-        {
-            double Temp;
-
-            Temp = RightPart[MaxElementIndex];
-            RightPart[MaxElementIndex] = RightPart[SortIndex];
-            RightPart[SortIndex] = Temp;
-
-            for (int i = 0; i < ColumCount; i++)
-            {
-                Temp = Matrix[MaxElementIndex][i];
-                Matrix[MaxElementIndex][i] = Matrix[SortIndex][i];
-                Matrix[SortIndex][i] = Temp;
-            }
-        }
-    }
-
-    public int SolveMatrix()
-    {
-        if (RowCount != ColumCount)
-            return 1; //нет решения
-
-        for (int i = 0; i < RowCount - 1; i++)
-        {
-            SortRows(i);
-            for (int j = i + 1; j < RowCount; j++)
-            {
-                if (Matrix[i][i] != 0) //если главный элемент не 0, то производим вычисления
+            // pivoting
+            for (int col = 0; col + 1 < rowCount; col++) if (M[col, col] == 0)
+                // check for zero coefficients
                 {
-                    double MultElement = Matrix[j][i] / Matrix[i][i];
-                    for (int k = i; k < ColumCount; k++)
-                        Matrix[j][k] -= Matrix[i][k] * MultElement;
-                    RightPart[j] -= RightPart[i] * MultElement;
+                    // find non-zero coefficient
+                    int swapRow = col + 1;
+                    for (; swapRow < rowCount; swapRow++) if (M[swapRow, col] != 0) break;
+
+                    if (M[swapRow, col] != 0) // found a non-zero coefficient?
+                    {
+                        // yes, then swap it with the above
+                        float[] tmp = new float[rowCount + 1];
+                        for (int i = 0; i < rowCount + 1; i++)
+                        { tmp[i] = M[swapRow, i]; M[swapRow, i] = M[col, i]; M[col, i] = tmp[i]; }
+                    }
+                    else return false; // no, then the matrix has no unique solution
                 }
-                //для нулевого главного элемента просто пропускаем данный шаг
-            }
-        }
 
-        //ищем решение
-        for (int i = (int)(RowCount - 1); i >= 0; i--)
-        {
-            Answer[i] = RightPart[i];
-
-            for (int j = (int)(RowCount - 1); j > i; j--)
-                Answer[i] -= Matrix[i][j] * Answer[j];
-
-            if (Matrix[i][i] == 0)
-                if (RightPart[i] == 0)
-                    return 2; //множество решений
-                else
-                    return 1; //нет решения
-
-            Answer[i] /= Matrix[i][i];
-
-        }
-        return 0;
-    }
-
-
-
-    public override String ToString()
-    {
-        String S = "";
-        for (int i = 0; i < RowCount; i++)
-        {
-            S += "\r\n";
-            for (int j = 0; j < ColumCount; j++)
+            // elimination
+            for (int sourceRow = 0; sourceRow + 1 < rowCount; sourceRow++)
             {
-                S += Matrix[i][j].ToString("F04") + "\t";
+                for (int destRow = sourceRow + 1; destRow < rowCount; destRow++)
+                {
+                    float df = M[sourceRow, sourceRow];
+                    float sf = M[destRow, sourceRow];
+                    for (int i = 0; i < rowCount + 1; i++)
+                        M[destRow, i] = M[destRow, i] * df - M[sourceRow, i] * sf;
+                }
             }
 
-            S += "\t" + Answer[i].ToString("F08");
-            S += "\t" + RightPart[i].ToString("F04");
+            // back-insertion
+            for (int row = rowCount - 1; row >= 0; row--)
+            {
+                float f = M[row, row];
+                if (f == 0) return false;
+
+                for (int i = 0; i < rowCount + 1; i++) M[row, i] /= f;
+                for (int destRow = 0; destRow < row; destRow++)
+                { M[destRow, rowCount] -= M[destRow, row] * M[row, rowCount]; M[destRow, row] = 0;
+                    Console.Write(M[destRow, rowCount]);
+                }
+            }
+            return true;
         }
-        return S;
     }
+
 }
+//class GausMethod
+//{
+//    public int RowCount;
+//    public int ColumCount;
+//    public double[][] Matrix { get; set; }
+//    public double[] RightPart { get; set; }
+//    public double[] Answer { get; set; }
+
+//    public GausMethod(int Row, int Colum)
+//    {
+//        RightPart = new double[Row];
+//        Answer = new double[Row];
+//        Matrix = new double[Row][];
+//        for (int i = 0; i < Row; i++)
+//            Matrix[i] = new double[Colum];
+//        RowCount = Row;
+//        ColumCount = Colum;
+
+//        обнулим массив
+//        for (int i = 0; i < Row; i++)
+//        {
+//            Answer[i] = 0;
+//            RightPart[i] = 0;
+//            for (int j = 0; j < Colum; j++)
+//                Matrix[i][j] = 0;
+//        }
+//    }
+
+//    private void SortRows(int SortIndex)
+//    {
+
+//        double MaxElement = Matrix[SortIndex][SortIndex];
+//        int MaxElementIndex = SortIndex;
+//        for (int i = SortIndex + 1; i < RowCount; i++)
+//        {
+//            if (Matrix[i][SortIndex] > MaxElement)
+//            {
+//                MaxElement = Matrix[i][SortIndex];
+//                MaxElementIndex = i;
+//            }
+//        }
+
+//        теперь найден максимальный элемент ставим его на верхнее место
+//        if (MaxElementIndex > SortIndex)//если это не первый элемент
+//        {
+//            double Temp;
+
+//            Temp = RightPart[MaxElementIndex];
+//            RightPart[MaxElementIndex] = RightPart[SortIndex];
+//            RightPart[SortIndex] = Temp;
+
+//            for (int i = 0; i < ColumCount; i++)
+//            {
+//                Temp = Matrix[MaxElementIndex][i];
+//                Matrix[MaxElementIndex][i] = Matrix[SortIndex][i];
+//                Matrix[SortIndex][i] = Temp;
+//            }
+//        }
+//    }
+
+//    public int SolveMatrix()
+//    {
+//        for (int i = 0; i < RowCount; i++)
+//        {
+//            for (int jeppa = 0; jeppa < ColumCount; jeppa++)
+//                Console.Write("{0} \t", Matrix[i][jeppa]);
+//            Console.WriteLine();
+//        }
+//        if (RowCount != ColumCount)
+//            return 1; //нет решения
+
+//        for (int i = 0; i < RowCount - 1; i++)
+//        {
+//            SortRows(i);
+//            for (int j = i + 1; j < RowCount; j++)
+//            {
+//                if (Matrix[i][i] != 0) //если главный элемент не 0, то производим вычисления
+//                {
+//                    double MultElement = Matrix[j][i] / Matrix[i][i];
+//                    for (int k = i; k < ColumCount; k++)
+//                        Matrix[j][k] -= Matrix[i][k] * MultElement;
+//                    RightPart[j] -= RightPart[i] * MultElement;
+//                }
+//                для нулевого главного элемента просто пропускаем данный шаг
+//            }
+//        }
+
+//        ищем решение
+//        for (int i = (int)(RowCount - 1); i >= 0; i--)
+//        {
+//            Answer[i] = RightPart[i];
+
+//            for (int j = (int)(RowCount - 1); j > i; j--)
+//                Answer[i] -= Matrix[i][j] * Answer[j];
+
+//            if (Matrix[i][i] == 0)
+//                if (RightPart[i] == 0)
+//                    return 2; //множество решений
+//                else
+//                    return 1; //нет решения
+
+//            Answer[i] /= Matrix[i][i];
+
+//        }
+//        return 0;
+//    }
+
+
+
+//    public override String ToString()
+//    {
+//        String S = "";
+//        for (int i = 0; i < RowCount; i++)
+//        {
+//            S += "\r\n";
+//            for (int j = 0; j < ColumCount; j++)
+//            {
+//                S += Matrix[i][j].ToString("F04") + "\t";
+//            }
+
+//            S += "\t" + Answer[i].ToString("F08");
+//            S += "\t" + RightPart[i].ToString("F04");
+//        }
+//        return S;
+//    }
+//}
