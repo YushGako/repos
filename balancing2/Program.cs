@@ -79,18 +79,6 @@ namespace balancing
                         {
 
                             tempstring = eq[i].ToString() + eq[i + 1].ToString();
-                            for (int o = i - 1; o - 1 >-1; o--)
-                            {
-                                Console.WriteLine("in the loop");
-                                if (eq[o - 1].ToString() + eq[o].ToString() == eq[i].ToString() + eq[i + 1].ToString())
-                                {
-                                    Console.WriteLine("I was here!");
-                                    temp += Solution.Matrix[Int32.Parse(elemPosition.GetKey(elemPosition.IndexOfValue(tempstring)).ToString())][Solution.ColumCount];
-                                }
-                                else if (eq[o] == equal || eq[o] == plus)
-                                    goto Add;
-                            }
-                            Add:
                             if (i + 2 < eq.Length && Double.TryParse(eq[i + 2].ToString(), out koeff[i]) == true)
                             {
                                 for (j = i + 3; j < eq.Length; j++)
@@ -117,24 +105,6 @@ namespace balancing
                         //ONE LETTERS AND KOEFF_____________________________________________________________________________________
                         else if (l)
                         {
-                            for (int o = i - 1; o >  -1; o--)
-                            {
-                                Console.WriteLine("temp - {0}", temp);
-                                for (int loop = 0; loop < elemPosition.Count; loop++)
-                                {
-                                    Console.WriteLine("\t{0}:\t{1}", elemPosition.GetKey(loop), elemPosition.GetByIndex(loop));
-                                }
-                                if (elemPosition.ContainsValue(eq[o]) == true)
-                                {
-                                    int index1 = elemPosition.IndexOfValue(eq[i]);
-                                    var item = elemPosition.GetKey(index1);
-                                    int row = Int32.Parse(item.ToString());
-                                    temp += Solution.Matrix[row][Solution.ColumCount];
-                                    printMatrix(Solution.Matrix, rows(eq), colomns(eq));
-                                    Console.WriteLine("temp - {0}", row);
-                                }
-                            }
-                            Add:
                             for (j = i + 2; j < eq.Length; j++)
                             {
                                 l = Double.TryParse(eq[j].ToString(), out koeff[j - 1]);
@@ -154,18 +124,6 @@ namespace balancing
                         }
                         else
                         {
-                            for (int o = i - 1; o > -1; o--)
-                            {
-                                Console.WriteLine("in the loop");
-                                if (eq[o].ToString() == eq[i].ToString())
-                                {
-                                    Console.WriteLine("I was here!");
-                                    koef += Solution.Matrix[Int32.Parse(elemPosition.GetKey(elemPosition.IndexOfValue(eq[o])).ToString())][Solution.ColumCount];
-                                }
-                                else if (eq[o] == equal || eq[o] == plus)
-                                    goto Add;
-                            }
-                            Add:
                             addElements(eq[i].ToString(), ref Solution.RowCount, Solution.ColumCount, rightElements, koef, parenthesisKoef, ref elemPosition, Solution.Matrix, caunter);
                         }
                             
@@ -260,7 +218,7 @@ namespace balancing
                 Solution.RightPart[h] = Solution.Matrix[h][Solution.ColumCount];
 
             Solution.SolveMatrix();
-            
+
             //Multiply:
             //for (int h = 0; h < Solution.ColumCount; h++)
             //{
@@ -280,9 +238,10 @@ namespace balancing
             //    }
             //}
 
+            int loop = 0;
             for (int b = 0; b < Solution.ColumCount; b++)
             {
-                Console.Write("{0} \t",Solution.Answer[b]);
+                Console.Write(Solution.Answer[b]);
                 //if (Math.Round(Solution.Answer[b]) != Solution.Answer[b])
                 //{
                 //    string khan = Solution.Answer[b].ToString();
@@ -290,13 +249,28 @@ namespace balancing
                 //    Solution.Answer[b] = Double.Parse(khan);
                 //}
                 //Console.Write("\t{0}", Solution.Answer[b]);
+
+                for (; loop < eq.Length; loop++)
+                {
+                    if (eq[loop] == equal || eq[loop] == plus)
+                    {
+
+                        Console.Write(" ");
+                        Console.Write(eq[loop]);
+                        Console.Write(" ");
+                        loop++;
+                        break;
+                    }
+
+                    Console.Write(eq[loop]);
+
+                }
             }
-            //for (; b < eq.Length; b++)
-            //{
-            //    Console.Write(eq[b]);
-            //    if (eq[b] == equal || eq[b] == plus)
-            //        break;
-            //}
+
+            for (; loop < eq.Length; loop++)
+                Console.Write(eq[loop]);
+
+            Console.WriteLine();
         }
 
         public static double[][] buildMatrix(int row, int colonm)
