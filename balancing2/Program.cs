@@ -11,6 +11,7 @@ namespace balancing
     {
         public static int caunter = 0;
         public static int rightElements = 0;
+        
 
         static void Main(string[] args)
         {
@@ -219,7 +220,7 @@ namespace balancing
 
             Solution.SolveMatrix();
 
-            Multiply:
+            int loop = 0, lastKoeff = 1;
             for (int h = 0; h < Solution.ColumCount; h++)
             {
 
@@ -228,20 +229,22 @@ namespace balancing
                     if (Solution.Answer[h] % 10 == 6 || Solution.Answer[h] % 10 == 7)
                     {
                         multiply(Solution.Answer, 3);
-                        goto Multiply;
+                        lastKoeff *= 3;
                     }
                     else
                     {
                         multiply(Solution.Answer, 2);
-                        goto Multiply;
+                        lastKoeff *= 2;
                     }
                 }
             }
 
-            int loop = 0;
             for (int b = 0; b < Solution.ColumCount; b++)
             {
-                Console.Write(Solution.Answer[b]);
+                if (!(Solution.Answer[b] == (int)Solution.Answer[b]))
+                    Console.Write(Math.Abs(Solution.Answer[b]).ToString("F01"));
+                else
+                    Console.Write(Math.Abs(Solution.Answer[b]));
 
                 for (; loop < eq.Length; loop++)
                 {
@@ -257,6 +260,8 @@ namespace balancing
                 }
             }
 
+
+            Console.Write(lastKoeff);
             for (; loop < eq.Length; loop++)
                 Console.Write(eq[loop]);
 
