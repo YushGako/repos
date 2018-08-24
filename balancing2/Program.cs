@@ -11,13 +11,13 @@ namespace balancing
     {
         public static int caunter = 0;
         public static int rightElements = 0;
+        public static char plus = '+', equal = '=', star = '*', parenthesisL = '(', parenthesisR = ')';
 
         static void Main(string[] args)
         {
             SortedList elemPosition = new SortedList();
             double[] koeff = new double[100];
             string tempstring;
-            char plus = '+', equal = '=', star = '*', parenthesisL = '(', parenthesisR = ')';
             Fourth:
             double temp = 0, tempEq = 0, koef = 1, parenthesisKoef = 1;
             bool k;
@@ -38,9 +38,11 @@ namespace balancing
                 goto Fourth;
             }
 
-            GausMethod Solution = new GausMethod(rows(eq), colomns(eq));
-            Solution.RowCount = 0;
-            Solution.ColumCount = 0;
+            double[][] Matrix = new double[rows(eq)][];
+            for (int m = 0; m < rows(eq); m++)
+               Matrix[m] = new double[colomns(eq)];
+            int RowCount = 0;
+            int ColumCount = 0;
 
             for (int i = 0; i < eq.Length; i++)
             {
@@ -94,12 +96,12 @@ namespace balancing
                                 {
                                     temp = Double.Parse(temp.ToString() + koeff[g - 2].ToString());
                                 }
-                                addElements(tempstring, ref Solution.RowCount, Solution.ColumCount, rightElements, parenthesisKoef * koef, temp, ref elemPosition, Solution.Matrix, caunter);
+                                addElements(tempstring, ref RowCount, ColumCount, rightElements, parenthesisKoef * koef, temp, ref elemPosition, Matrix, caunter);
 
                             }
                             else
                             {
-                                addElements(tempstring, ref Solution.RowCount, Solution.ColumCount, rightElements, parenthesisKoef * koef, 1, ref elemPosition, Solution.Matrix, caunter);
+                                addElements(tempstring, ref RowCount, ColumCount, rightElements, parenthesisKoef * koef, 1, ref elemPosition, Matrix, caunter);
                             }
                         }
                         //ONE LETTERS AND KOEFF_____________________________________________________________________________________
@@ -119,12 +121,12 @@ namespace balancing
                                 temp += Double.Parse(temp.ToString() + koeff[g - 1].ToString());
                             }
 
-                            addElements(eq[i].ToString(), ref Solution.RowCount, Solution.ColumCount, rightElements, parenthesisKoef * koef, temp, ref elemPosition, Solution.Matrix, caunter);
+                            addElements(eq[i].ToString(), ref RowCount, ColumCount, rightElements, parenthesisKoef * koef, temp, ref elemPosition, Matrix, caunter);
 
                         }
                         else
                         {
-                            addElements(eq[i].ToString(), ref Solution.RowCount, Solution.ColumCount, rightElements, koef, parenthesisKoef, ref elemPosition, Solution.Matrix, caunter);
+                            addElements(eq[i].ToString(), ref RowCount, ColumCount, rightElements, koef, parenthesisKoef, ref elemPosition, Matrix, caunter);
                         }
                             
                     }
@@ -136,13 +138,13 @@ namespace balancing
                             if (eq[o].ToString() == eq[i].ToString())
                             {
                                 Console.WriteLine("I was here!");
-                                koef += Solution.Matrix[Int32.Parse(elemPosition.GetKey(elemPosition.IndexOfValue(eq[o])).ToString())][Solution.ColumCount];
+                                koef += Matrix[Int32.Parse(elemPosition.GetKey(elemPosition.IndexOfValue(eq[o])).ToString())][ColumCount];
                             }
                             else if (eq[o] == equal || eq[o] == plus)
                                 goto Add;
                         }
                         Add:
-                        addElements(eq[i].ToString(), ref Solution.RowCount, Solution.ColumCount, rightElements, koef, parenthesisKoef, ref elemPosition, Solution.Matrix, caunter);
+                        addElements(eq[i].ToString(), ref RowCount, ColumCount, rightElements, koef, parenthesisKoef, ref elemPosition, Matrix, caunter);
                     }
                 }
 
@@ -150,7 +152,7 @@ namespace balancing
                 else if (eq[i].ToString() == plus.ToString() || eq[i].ToString() == star.ToString())
                 {
                     ++i;
-                    ++Solution.ColumCount;
+                    ++ColumCount;
                     if (caunter > 0)
                         caunter--;
                     goto Third;
@@ -159,7 +161,7 @@ namespace balancing
                 {
                     ++rightElements;
                     ++i;
-                    ++Solution.ColumCount;
+                    ++ColumCount;
                     if (caunter > 0)
                         caunter--;
                     goto Third;
@@ -211,56 +213,56 @@ namespace balancing
                 }
 
             }
-            printMatrix(Solution.Matrix, rows(eq), colomns(eq));
+            printMatrix(Matrix, rows(eq), colomns(eq));
 
 
-            for (int h = 0; h < Solution.RowCount; h++)
-                Solution.RightPart[h] = Solution.Matrix[h][Solution.ColumCount];
+            //for (int h = 0; h < RowCount; h++)
+            //    RightPart[h] = Matrix[h][ColumCount];
 
-            Solution.SolveMatrix();
+            Solve(Matrix, eq);
 
-            Multiply:
-            for (int h = 0; h < Solution.ColumCount; h++)
-            {
+            //Multiply:
+            //for (int h = 0; h < ColumCount; h++)
+            //{
                 
-                if (Solution.Answer[h] <1 )
-                {
-                    if (Solution.Answer[h] % 10 == 6 || Solution.Answer[h] % 10 == 7)
-                    {
-                        multiply(Solution.Answer, 3);
-                        goto Multiply;
-                    }
-                    else
-                    {
-                        multiply(Solution.Answer, 2);
-                        goto Multiply;
-                    }
-                }
-            }
+            //    if (Answer[h] <1 )
+            //    {
+            //        if (Answer[h] % 10 == 6 || Answer[h] % 10 == 7)
+            //        {
+            //            multiply(Answer, 3);
+            //            goto Multiply;
+            //        }
+            //        else
+            //        {
+            //            multiply(Answer, 2);
+            //            goto Multiply;
+            //        }
+            //    }
+            //}
 
-            int loop = 0;
-            for (int b = 0; b < Solution.ColumCount; b++)
-            {
-                Console.Write(Solution.Answer[b]);
+            //int loop = 0;
+            //for (int b = 0; b < ColumCount; b++)
+            //{
+            //    Console.Write(Answer[b]);
 
-                for (; loop < eq.Length; loop++)
-                {
-                    if (eq[loop] == equal || eq[loop] == plus)
-                    {
-                        Console.Write(" {0} ", eq[loop]);
-                        loop++;
-                        break;
-                    }
+            //    for (; loop < eq.Length; loop++)
+            //    {
+            //        if (eq[loop] == equal || eq[loop] == plus)
+            //        {
+            //            Console.Write(" {0} ", eq[loop]);
+            //            loop++;
+            //            break;
+            //        }
 
-                    Console.Write(eq[loop]);
+            //        Console.Write(eq[loop]);
 
-                }
-            }
+            //    }
+            //}
 
-            for (; loop < eq.Length; loop++)
-                Console.Write(eq[loop]);
+        //    for (; loop < eq.Length; loop++)
+        //        Console.Write(eq[loop]);
 
-            Console.WriteLine();
+        //    Console.WriteLine();
         }
 
         public static double[][] buildMatrix(int row, int colonm)
@@ -305,7 +307,7 @@ namespace balancing
         public static int colomns(string eq)
         {
             char equal = '=', plus = '+';
-            int colonms = 2;
+            int colonms = 1;
             for (int indexer = 0; indexer < eq.Length; indexer++)
             {
                 if (((eq[indexer]).ToString()) == equal.ToString() || ((eq[indexer]).ToString()) == plus.ToString())
@@ -376,57 +378,80 @@ namespace balancing
 
         }
 
-        public static bool Solve(float[,] M)
+        public static bool Solve(double[][] M, string equation)
         {
             // input checks
             int rowCount = M.GetUpperBound(0) + 1;
-            if (M == null || M.Length != rowCount * (rowCount + 1))
-                throw new ArgumentException("The algorithm must be provided with a (n x n+1) matrix.");
             if (rowCount < 1)
                 throw new ArgumentException("The matrix must at least have one row.");
 
             // pivoting
-            for (int col = 0; col + 1 < rowCount; col++) if (M[col, col] == 0)
+            for (int col = 0; col + 1 < rowCount; col++) if (M[col][col] == 0)
                 // check for zero coefficients
-                {
+            {
                     // find non-zero coefficient
                     int swapRow = col + 1;
-                    for (; swapRow < rowCount; swapRow++) if (M[swapRow, col] != 0) break;
+                    for (; swapRow < rowCount; swapRow++) if (M[swapRow][col] != 0) break;
 
-                    if (M[swapRow, col] != 0) // found a non-zero coefficient?
+                    if (M[swapRow][col] != 0) // found a non-zero coefficient?
                     {
                         // yes, then swap it with the above
-                        float[] tmp = new float[rowCount + 1];
+                        double[] tmp = new double[rowCount + 1];
                         for (int i = 0; i < rowCount + 1; i++)
-                        { tmp[i] = M[swapRow, i]; M[swapRow, i] = M[col, i]; M[col, i] = tmp[i]; }
+                        { tmp[i] = M[swapRow][i]; M[swapRow][i] = M[col][i]; M[col][i] = tmp[i]; }
                     }
                     else return false; // no, then the matrix has no unique solution
-                }
+            }
 
             // elimination
             for (int sourceRow = 0; sourceRow + 1 < rowCount; sourceRow++)
             {
                 for (int destRow = sourceRow + 1; destRow < rowCount; destRow++)
                 {
-                    float df = M[sourceRow, sourceRow];
-                    float sf = M[destRow, sourceRow];
+                    double df = M[sourceRow][sourceRow];
+                    double sf = M[destRow][sourceRow];
                     for (int i = 0; i < rowCount + 1; i++)
-                        M[destRow, i] = M[destRow, i] * df - M[sourceRow, i] * sf;
+                        M[destRow][i] = M[destRow][i] * df - M[sourceRow][i] * sf;
                 }
             }
 
             // back-insertion
             for (int row = rowCount - 1; row >= 0; row--)
             {
-                float f = M[row, row];
+                double f = M[row][row];
                 if (f == 0) return false;
 
-                for (int i = 0; i < rowCount + 1; i++) M[row, i] /= f;
+                for (int i = 0; i < rowCount + 1; i++) M[row][i] /= f;
                 for (int destRow = 0; destRow < row; destRow++)
-                { M[destRow, rowCount] -= M[destRow, row] * M[row, rowCount]; M[destRow, row] = 0;
-                    Console.Write(M[destRow, rowCount]);
+                {
+                    M[destRow][rowCount] -= M[destRow][row] * M[row][rowCount]; M[destRow][row] = 0;
                 }
             }
+
+            int loop = 0;
+            for (int b = 0; b < rowCount; b++)
+            {
+                Console.Write(M[b][rowCount]);
+
+                for (; loop < equation.Length; loop++)
+                {
+                    if (equation[loop] == equal || equation[loop] == plus)
+                    {
+                        Console.Write(" {0} ", equation[loop]);
+                        loop++;
+                        break;
+                    }
+
+                    Console.Write(equation[loop]);
+
+                }
+            }
+
+            for (; loop < equation.Length; loop++)
+                Console.Write(equation[loop]);
+
+            Console.WriteLine();
+
             return true;
         }
     }
